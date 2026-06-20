@@ -874,7 +874,7 @@ MAX_TOKENS_INPUT=2048                        # 입력 토큰 제한</pre>
 <div class="section">
   <div class="section-title">
     <div class="icon">🏦</div>
-    금융기업 보안 담당자 관점 — 도입 고려사항 및 기술 발전 분석
+    금융기업 AI 도구 도입 — 보안 검토·기술 장벽·발전 과제
   </div>
 
   <p>
@@ -932,144 +932,228 @@ MAX_TOKENS_INPUT=2048                        # 입력 토큰 제한</pre>
 
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
 
-    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
-      <div style="background:#1e3a5f; padding:12px 16px;">
-        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ①  프롬프트 인젝션 탐지 불가</span>
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🛡</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">프롬프트 인젝션 탐지 불가</span>
+        <span class="tag tag-green" style="margin-left:auto;">해결됨</span>
       </div>
-      <div style="padding:14px 16px; background:#f0f7ff;">
-        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
-        <p style="font-size:13px; margin-bottom:10px;">규칙 기반 필터는 "ignore previous instructions" 같은 패턴을 우회하는 공격에 무력. 금융 보안 담당자 입장에서 AI 도구 자체가 공격 경로가 될 수 있어 전면 금지 기조</p>
-        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
-        <p style="font-size:13px; margin:0;">DeBERTa-v3 기반 전용 분류 모델(protectai/deberta-v3-base-prompt-injection-v2)이 공개되어 F1 94% 수준의 실시간 탐지가 가능해짐. 규칙이 아닌 의미 이해 기반 탐지</p>
-      </div>
-    </div>
-
-    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
-      <div style="background:#1e3a5f; padding:12px 16px;">
-        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ②  한국어 PII 인식 부재</span>
-      </div>
-      <div style="padding:14px 16px; background:#f0f7ff;">
-        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
-        <p style="font-size:13px; margin-bottom:10px;">금융고객 정보(주민번호, 계좌번호 등)를 AI 입력 전 자동 마스킹하는 오픈소스 도구가 영어 중심. 한국어 금융 문서에서 PII를 자동 탐지하기 어려웠음</p>
-        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
-        <p style="font-size:13px; margin:0;">BERT 기반 다국어 NER 모델과 Microsoft Presidio의 커스텀 인식기 기능으로 한국어 주민번호·계좌번호·전화번호 패턴을 추가 학습 없이도 정규식 + NLP 조합으로 탐지 가능</p>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">과거 장벽</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>규칙 기반 필터는 변형된 우회 공격 패턴에 무력 — 탐지율 낮고 오탐 다수</li>
+          <li>AI 도구 자체가 공격 경로가 될 수 있어 금융권에서 <strong>전면 도입 금지 기조</strong> 유지</li>
+          <li>개별 규칙 추가만으로는 신규 변종 공격을 따라잡기 어려운 구조적 한계</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">기술 발전으로 해결</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>DeBERTa-v3 전용 분류 모델 공개 — <strong>F1 94%</strong> 수준 실시간 탐지 가능</li>
+          <li>규칙이 아닌 <strong>의미 이해 기반</strong> 탐지로 변형 공격에도 강건하게 대응</li>
+        </ul>
       </div>
     </div>
 
-    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
-      <div style="background:#1e3a5f; padding:12px 16px;">
-        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ③  데이터 처리 경로 불투명</span>
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🔏</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">한국어 PII 자동 인식 부재</span>
+        <span class="tag tag-green" style="margin-left:auto;">해결됨</span>
       </div>
-      <div style="padding:14px 16px; background:#f0f7ff;">
-        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
-        <p style="font-size:13px; margin-bottom:10px;">SaaS 형태의 AI API를 호출하면 데이터가 어느 서버를 거쳐 처리되는지 알 수 없어 금융감독 기관의 데이터 처리 경로 소명 요구에 대응 불가</p>
-        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
-        <p style="font-size:13px; margin:0;">AWS Bedrock의 VPC Endpoint + CloudTrail 조합으로 모든 API 호출이 계정 내부에서 처리되고 전수 기록됨. 금감원 검사 시 처리 경로를 로그로 소명 가능</p>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">과거 장벽</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>PII 자동 마스킹 오픈소스 도구가 <strong>영어 중심</strong>으로 설계 — 한국어 지원 부재</li>
+          <li>주민번호·계좌번호 등 한국 금융 도메인 특화 패턴 인식 불가</li>
+          <li>수동 마스킹에 의존 — 누락 시 개인정보가 그대로 모델에 전달되는 위험</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">기술 발전으로 해결</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>BERT 기반 <strong>다국어 NER 모델</strong>로 한국어 문맥 속 개인정보 인식 가능</li>
+          <li>Microsoft Presidio 커스텀 인식기로 주민번호·계좌번호 <strong>정규식 + NLP 조합</strong> 탐지</li>
+          <li>입력 시 자동 마스킹 → 응답 시 자동 복원으로 사용자 경험 유지</li>
+        </ul>
       </div>
     </div>
 
-    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
-      <div style="background:#1e3a5f; padding:12px 16px;">
-        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ④  보안 정책의 코드화 불가</span>
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🗺</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">데이터 처리 경로 불투명</span>
+        <span class="tag tag-green" style="margin-left:auto;">해결됨</span>
       </div>
-      <div style="padding:14px 16px; background:#f0f7ff;">
-        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
-        <p style="font-size:13px; margin-bottom:10px;">AI 사용 정책을 사람이 매뉴얼로 관리. 어떤 주제는 금지, 어떤 부서는 허용 등 정책 변경이 느리고 적용 누락 발생</p>
-        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
-        <p style="font-size:13px; margin:0;">Kong DB-less YAML + LLM Guard 환경변수 기반으로 보안 정책을 코드로 선언. Git PR 리뷰 → 자동 배포로 정책 변경 이력이 코드와 함께 관리됨 (Policy as Code)</p>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">과거 장벽</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>SaaS AI API 호출 시 데이터가 <strong>어느 서버를 거쳐 처리되는지 알 수 없음</strong></li>
+          <li>금융감독 기관의 데이터 처리 경로 소명 요구에 대응 불가</li>
+          <li>신용정보법·개인정보보호법상 국외 이전 통제 의무 이행 수단 부재</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">기술 발전으로 해결</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>AWS Bedrock VPC Endpoint로 프롬프트·응답이 <strong>AWS 계정 밖으로 나가지 않음</strong></li>
+          <li>CloudTrail이 모든 InvokeModel 호출 자동 기록 — 금감원 검사 시 경로 소명 가능</li>
+          <li>리전 지정으로 데이터 레지던시 보장, 국외 이전 규제 요건 충족</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🔍</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">LLM 특화 위협 — 기존 보안 솔루션의 공백</span>
+        <span class="tag tag-green" style="margin-left:auto;">해결됨</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">과거 장벽</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>DLP·WAF·Proxy 등 기존 보안 솔루션은 <strong>알려진 패턴(시그니처)</strong> 기반으로 역할을 충실히 수행</li>
+          <li>LLM 도입으로 <strong>언어로 모델 추론을 조작</strong>하는 프롬프트 인젝션이라는 신규 공격 표면 등장</li>
+          <li>정형 패턴 없이 <strong>문맥 조합으로 이뤄지는 PII 유출</strong>은 기존 시그니처로 정의 자체가 불가</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">기술 발전으로 해결</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>DeBERTa ML 모델이 텍스트의 <strong>의미와 의도</strong>를 이해해 프롬프트 인젝션 실시간 탐지</li>
+          <li>Presidio NLP가 형식 없는 문맥 속 PII를 인식해 자동 마스킹</li>
+          <li>기존 보안 솔루션의 공백 영역을 <strong>LLM 전용 보안 계층</strong>이 보완하는 다층 방어 구조 실현</li>
+        </ul>
       </div>
     </div>
 
   </div>
 
-  <!-- ── 3. 여전히 미흡한 사항 ── -->
-  <h3>3. 여전히 미흡하거나 미해결로 남은 과제</h3>
+  <!-- ── 3+4. 미해결 과제 및 발전 방향 ── -->
+  <h3>3. 미해결 과제 및 발전 방향</h3>
 
-  <table>
-    <thead>
-      <tr>
-        <th style="width:5%"></th>
-        <th style="width:25%">미해결 과제</th>
-        <th style="width:40%">현재 상태 및 한계</th>
-        <th style="width:30%">잠재적 리스크</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="text-align:center"><span class="tag tag-red">미흡</span></td>
-        <td><strong>Hallucination(환각) 탐지</strong></td>
-        <td>모델이 존재하지 않는 금융 규정, 잘못된 수치를 자신 있게 생성해도 현재 아키텍처는 이를 탐지할 수단이 없음</td>
-        <td>금융 업무 활용 시 잘못된 정보가 의사결정에 반영될 위험. RAG + 사실 검증 레이어 필요</td>
-      </tr>
-      <tr>
-        <td style="text-align:center"><span class="tag tag-red">미흡</span></td>
-        <td><strong>한국어 특화 PII 정밀도</strong></td>
-        <td>BERT 다국어 모델이 한국어 PII를 처리하나, 금융 도메인 특화 학습이 없어 "홍길동 계좌" 같은 문맥 의존 PII는 탐지율이 낮음</td>
-        <td>금융고객 정보가 마스킹 없이 모델로 전달될 가능성. 금융 도메인 파인튜닝된 NER 모델 필요</td>
-      </tr>
-      <tr>
-        <td style="text-align:center"><span class="tag tag-red">미흡</span></td>
-        <td><strong>AI 생성 코드 보안 검증</strong></td>
-        <td>Claude Code가 생성한 코드가 보안 취약점(SQL Injection, 하드코딩 시크릿 등)을 포함할 수 있으나 응답 단계에서 코드 취약점 분석은 현재 미구현</td>
-        <td>취약한 코드가 리뷰 없이 배포될 경우 금융 시스템 침해 경로가 될 수 있음</td>
-      </tr>
-      <tr>
-        <td style="text-align:center"><span class="tag tag-orange">부분</span></td>
-        <td><strong>실시간 행위 분석 (UEBA)</strong></td>
-        <td>로그는 수집되나 개별 사용자의 행위 패턴(평소 대비 이상 질의 패턴)을 자동으로 분석하는 UEBA 연동이 미구현</td>
-        <td>점진적인 정보 탈취(slow exfiltration) 시도를 룰 기반 알림만으로는 탐지하기 어려움</td>
-      </tr>
-      <tr>
-        <td style="text-align:center"><span class="tag tag-orange">부분</span></td>
-        <td><strong>모델 응답 법적 책임 귀속</strong></td>
-        <td>AI가 생성한 금융 조언·코드에 대한 법적 책임이 사용자인지 기업인지 불명확. 현재 국내 법 해석 미정립</td>
-        <td>금융 소비자보호법, 자본시장법 위반 가능성. 면책 조항 및 사용 가이드라인 정책 수립 필요</td>
-      </tr>
-    </tbody>
-  </table>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
 
-  <!-- ── 4. 앞으로의 고려사항 ── -->
-  <h3>4. 향후 고려해야 할 발전 방향</h3>
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🔬</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">Hallucination(환각) 탐지</span>
+        <span class="tag tag-red" style="margin-left:auto;">미흡</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">현재 한계</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>잘못된 금융 규정·수치를 자신 있게 생성해도 탐지 수단 없음</li>
+          <li>금융 업무 의사결정에 오정보가 반영될 위험</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">발전 방향</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>내부 금융 규정집·약관을 벡터 DB에 색인</li>
+          <li>모델 응답을 실제 문서와 대조하는 RAG 검증 파이프라인 도입</li>
+        </ul>
+      </div>
+    </div>
 
-  <div class="card-grid">
-    <div class="card">
-      <div class="card-icon" style="font-size:20px;">🔬</div>
-      <h4>RAG 기반 사실 검증 레이어 추가</h4>
-      <p style="font-size:13px;">내부 금융 규정집·상품 약관을 벡터 DB에 색인하고, 모델 응답을 실제 문서와 대조하는 Hallucination 검증 파이프라인 도입. 금융 업무 활용의 핵심 전제 조건.</p>
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🇰🇷</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">한국어 금융 PII 정밀도</span>
+        <span class="tag tag-red" style="margin-left:auto;">미흡</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">현재 한계</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>금융 도메인 특화 학습 미적용으로 문맥 의존 PII 탐지율 낮음</li>
+          <li>금융고객 정보가 마스킹 없이 모델에 전달될 가능성</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">발전 방향</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>계좌번호·증권번호·보험번호 등 금융 PII 특화 NER 모델 파인튜닝</li>
+          <li>금융보안원·금융결제원 가이드라인 기반 커스텀 인식기 확장</li>
+        </ul>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-icon" style="font-size:20px;">🇰🇷</div>
-      <h4>한국어 금융 도메인 NER 모델</h4>
-      <p style="font-size:13px;">금융보안원·금융결제원 가이드라인에 맞는 한국어 금융 PII(계좌번호, 증권번호, 보험번호 등)를 정밀 탐지하는 파인튜닝 모델 개발 또는 도입 검토.</p>
+
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🔐</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">AI 생성 코드 보안 검증</span>
+        <span class="tag tag-red" style="margin-left:auto;">미흡</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">현재 한계</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>생성된 코드 내 SQL Injection·하드코딩 시크릿 등 취약점 탐지 미구현</li>
+          <li>취약 코드가 검토 없이 배포될 경우 금융 시스템 침해 경로 가능</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">발전 방향</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>Output 스캐너에 SAST 도구(Semgrep, Bandit) 연동</li>
+          <li>위험 코드 패턴 감지 시 경고 또는 응답 차단</li>
+        </ul>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-icon" style="font-size:20px;">🕵</div>
-      <h4>UEBA 연동 이상 행위 탐지</h4>
-      <p style="font-size:13px;">사용자별 AI 질의 패턴을 학습해 평소와 다른 민감 정보 접근 시도를 자동 탐지. CloudWatch Logs를 Amazon Security Lake → SIEM UEBA 엔진과 연동.</p>
+
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🕵</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">실시간 행위 분석 (UEBA)</span>
+        <span class="tag tag-orange" style="margin-left:auto;">부분</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">현재 한계</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>로그 수집은 되나 사용자 행위 패턴 자동 분석 미구현</li>
+          <li>점진적 정보 탈취(slow exfiltration)를 룰 기반 알림만으로는 탐지 어려움</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">발전 방향</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>CloudWatch Logs → Amazon Security Lake → SIEM UEBA 엔진 연동</li>
+          <li>평소 대비 이상 질의 패턴 자동 감지 및 알림</li>
+        </ul>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-icon" style="font-size:20px;">🔐</div>
-      <h4>AI 생성 코드 보안 자동 검사</h4>
-      <p style="font-size:13px;">Claude Code 응답으로 생성된 코드를 SAST 도구(Semgrep, Bandit)와 연동해 취약점을 자동 탐지하고 위험 코드 패턴 포함 시 경고 또는 차단.</p>
+
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">📜</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">모델 응답 법적 책임 귀속</span>
+        <span class="tag tag-orange" style="margin-left:auto;">부분</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">현재 한계</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>AI 생성 금융 조언·코드의 책임 소재 국내 법 해석 미정립</li>
+          <li>금융소비자보호법·자본시장법 위반 가능성 상존</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">발전 방향</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>허용 업무 범위·검토 의무·책임 귀속 등 내부 AI 사용 정책 거버넌스 수립</li>
+          <li>EU AI Act 동향 모니터링 및 국내 AI 기본법 대응 체계 선제 준비</li>
+        </ul>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-icon" style="font-size:20px;">📜</div>
-      <h4>AI 사용 정책 거버넌스 체계 수립</h4>
-      <p style="font-size:13px;">금융보안원의 AI 활용 보안 가이드라인(2024)에 따른 내부 정책 수립. 허용 업무 범위, 출력물 검토 의무, 사고 시 책임 귀속 등 운영 규정 문서화.</p>
+
+    <div style="border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8faff; padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">🤝</span>
+        <span style="font-weight:700; font-size:13px; color:#1e3a5f;">AI 공급망 보안</span>
+        <span class="tag tag-orange" style="margin-left:auto;">선제 대응</span>
+      </div>
+      <div style="padding:12px 16px;">
+        <p style="color:#6b7280; font-size:11px; font-weight:700; margin-bottom:4px;">현재 한계</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin-bottom:10px; color:#374151;">
+          <li>외부 LLM 모델·플러그인·오픈소스 라이브러리의 취약점이 내부로 전파될 위험</li>
+          <li>모델 업데이트 시 행동 변화로 인한 보안 정책 우회 가능성</li>
+        </ul>
+        <p style="color:#16a34a; font-size:11px; font-weight:700; margin-bottom:4px;">발전 방향</p>
+        <ul style="font-size:12.5px; padding-left:16px; line-height:1.7; margin:0; color:#374151;">
+          <li>모델 버전 고정 및 의존성 스캔(SBOM) 도입</li>
+          <li>공급업체 보안 검토 프로세스 수립 및 정기 점검 체계화</li>
+        </ul>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-icon" style="font-size:20px;">🌐</div>
-      <h4>망분리 환경 적용 방안</h4>
-      <p style="font-size:13px;">금융기관 망분리 규정(전자금융감독규정 제15조)에서 인터넷망 AI 도구 사용은 원칙적으로 금지. AWS GovCloud 또는 온프레미스 LLM 서버 구성으로 내부망 전용 AI 환경 구축 검토 필요.</p>
-    </div>
+
   </div>
 
   <div class="highlight-box orange">
     <strong>금융 보안 담당자 종합 판단:</strong>
-    현재 아키텍처는 <strong>데이터 주권·접근 제어·감사 추적</strong>의 기본 요건을 충족합니다.
-    그러나 금융 업무에 실제 활용하려면 Hallucination 검증 레이어 추가, 한국어 PII 정밀도 향상,
-    망분리 환경 대응이 선결 과제입니다. 현 단계에서는 <strong>개발 보조 도구(코드 초안 생성, 문서 요약)</strong>
-    수준의 제한적 활용과 병행하여 단계적으로 보안 성숙도를 높여가는 접근이 현실적입니다.
+    현재 아키텍처는 <strong>데이터 주권·접근 제어·감사 추적</strong>의 기본 요건을 충족하며, 금융기업이 AI 도구를 안전하게 도입할 수 있는 실질적인 토대를 갖추고 있습니다.
+    AI 기술은 예상을 뛰어넘는 속도로 발전하고 있습니다. Hallucination 검증, 한국어 PII 정밀도, AI 공급망 보안 등 남은 과제들도 빠르게 해결되고 있는 영역입니다.
+    지금 준비하지 않으면 기술이 성숙했을 때 조직이 따라가지 못하는 상황이 됩니다.
+    <strong>선제적으로 보안 아키텍처와 거버넌스를 구축해두는 것이 금융 보안 담당자의 핵심 역할</strong>이며, 이 프로젝트는 그 출발점입니다.
   </div>
 </div>
 
