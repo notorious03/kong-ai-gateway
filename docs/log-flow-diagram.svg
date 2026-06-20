@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 480" width="860" height="480" font-family="'Malgun Gothic','Apple SD Gothic Neo',sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrY" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#e3b341"/>
+    </marker>
+    <marker id="arrG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3fb950"/>
+    </marker>
+    <marker id="arrP" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#c4b5fd"/>
+    </marker>
+    <filter id="sh2">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="860" height="480" fill="url(#bg2)" rx="12"/>
+
+  <!-- Title -->
+  <text x="430" y="36" text-anchor="middle" fill="#c9d1d9" font-size="16" font-weight="700">통합 로그 수집 및 분석 흐름</text>
+  <text x="430" y="54" text-anchor="middle" fill="#6e7681" font-size="12">Kong · Guardrails · Bedrock → CloudWatch → S3 → Athena / SIEM</text>
+
+  <!-- ══ 소스 레이어 (3개 박스) ══ -->
+  <!-- Kong -->
+  <rect x="40" y="80" width="200" height="110" rx="10" fill="#0e2240" stroke="#3d6b9e" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="140" y="104" text-anchor="middle" fill="#90cdf4" font-size="13" font-weight="700">Kong</text>
+  <text x="140" y="120" text-anchor="middle" fill="#6e7681" font-size="10">Access Log (stdout)</text>
+  <rect x="56" y="128" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="141" y="140" text-anchor="middle" fill="#8b949e" font-size="9.5">요청 IP · 경로 · 상태코드</text>
+  <rect x="56" y="148" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="141" y="160" text-anchor="middle" fill="#8b949e" font-size="9.5">응답시간 · 소비자(apikey)</text>
+  <rect x="56" y="168" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="141" y="180" text-anchor="middle" fill="#8b949e" font-size="9.5">rate-limit 위반 여부</text>
+
+  <!-- Guardrails -->
+  <rect x="330" y="80" width="200" height="110" rx="10" fill="#0a2218" stroke="#2d6a4f" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="430" y="104" text-anchor="middle" fill="#6ee7b7" font-size="13" font-weight="700">Guardrails</text>
+  <text x="430" y="120" text-anchor="middle" fill="#6e7681" font-size="10">App Log (JSON, stdout)</text>
+  <rect x="346" y="128" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="431" y="140" text-anchor="middle" fill="#8b949e" font-size="9.5">risk_score · 스캐너별 점수</text>
+  <rect x="346" y="148" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="431" y="160" text-anchor="middle" fill="#8b949e" font-size="9.5">차단여부 · PII 익명화 건수</text>
+  <rect x="346" y="168" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="431" y="180" text-anchor="middle" fill="#8b949e" font-size="9.5">입력 토큰수 · 처리 지연(ms)</text>
+
+  <!-- Bedrock CloudTrail -->
+  <rect x="620" y="80" width="200" height="110" rx="10" fill="#1a0a30" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="720" y="104" text-anchor="middle" fill="#c4b5fd" font-size="13" font-weight="700">Bedrock</text>
+  <text x="720" y="120" text-anchor="middle" fill="#6e7681" font-size="10">CloudTrail (자동 기록)</text>
+  <rect x="636" y="128" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="721" y="140" text-anchor="middle" fill="#8b949e" font-size="9.5">InvokeModel · 모델 ARN</text>
+  <rect x="636" y="148" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="721" y="160" text-anchor="middle" fill="#8b949e" font-size="9.5">입출력 토큰수 · IAM 역할</text>
+  <rect x="636" y="168" width="170" height="16" rx="4" fill="#0d1117" fill-opacity="0.6"/>
+  <text x="721" y="180" text-anchor="middle" fill="#8b949e" font-size="9.5">호출 시각 · 소스 IP</text>
+
+  <!-- ══ 화살표: 소스 → CloudWatch ══ -->
+  <line x1="140" y1="190" x2="140" y2="254" stroke="#58a6ff" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="430" y1="190" x2="430" y2="254" stroke="#3fb950" stroke-width="2" marker-end="url(#arrG)"/>
+  <line x1="720" y1="190" x2="720" y2="214" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <path d="M 720 214 Q 720 240 600 254" stroke="#c4b5fd" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrP)"/>
+
+  <!-- label -->
+  <text x="56" y="226" fill="#484f58" font-size="10">ECS awslogs 드라이버</text>
+  <text x="346" y="226" fill="#484f58" font-size="10">ECS awslogs 드라이버</text>
+  <text x="636" y="208" fill="#484f58" font-size="10">CloudTrail → CW Logs</text>
+
+  <!-- ══ CloudWatch 박스 ══ -->
+  <rect x="100" y="258" width="660" height="72" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="430" y="280" text-anchor="middle" fill="#e3b341" font-size="13" font-weight="700">Amazon CloudWatch Logs</text>
+  <text x="200" y="298" text-anchor="middle" fill="#58a6ff" font-size="10.5">/ecs/kong-ai-gateway/kong</text>
+  <text x="430" y="298" text-anchor="middle" fill="#3fb950" font-size="10.5">/ecs/kong-ai-gateway/guardrails</text>
+  <text x="650" y="298" text-anchor="middle" fill="#c4b5fd" font-size="10.5">aws-bedrock-invocations</text>
+  <text x="430" y="318" text-anchor="middle" fill="#6e7681" font-size="10">CloudWatch Insights — 즉각 쿼리 · 알림(SNS) 설정</text>
+
+  <!-- ══ 화살표: CloudWatch → 3방향 ══ -->
+  <!-- → S3 -->
+  <line x1="250" y1="330" x2="180" y2="374" stroke="#e3b341" stroke-width="2" marker-end="url(#arrY)"/>
+  <!-- → Athena -->
+  <line x1="430" y1="330" x2="430" y2="374" stroke="#e3b341" stroke-width="2" marker-end="url(#arrY)"/>
+  <!-- → SIEM -->
+  <line x1="610" y1="330" x2="680" y2="374" stroke="#e3b341" stroke-width="2" marker-end="url(#arrY)"/>
+
+  <!-- ══ 하단 3개 목적지 ══ -->
+  <!-- S3 Archive -->
+  <rect x="60" y="378" width="230" height="72" rx="10" fill="#1a1200" stroke="#854d0e" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="175" y="400" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="700">S3 Archive</text>
+  <text x="175" y="416" text-anchor="middle" fill="#6e7681" font-size="10">장기 보관 (Lifecycle 90일+)</text>
+  <text x="175" y="432" text-anchor="middle" fill="#8b949e" font-size="10">s3://company-ai-gateway-logs/</text>
+  <text x="175" y="448" text-anchor="middle" fill="#8b949e" font-size="10">일별 파티셔닝  YYYY/MM/DD</text>
+
+  <!-- Athena -->
+  <rect x="315" y="378" width="230" height="72" rx="10" fill="#0a1f0a" stroke="#16a34a" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="430" y="400" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">Amazon Athena</text>
+  <text x="430" y="416" text-anchor="middle" fill="#6e7681" font-size="10">SQL 기반 로그 분석</text>
+  <text x="430" y="432" text-anchor="middle" fill="#8b949e" font-size="10">월간 보안 리포트 쿼리</text>
+  <text x="430" y="448" text-anchor="middle" fill="#8b949e" font-size="10">팀별 토큰 사용량 집계</text>
+
+  <!-- SIEM / OpenSearch -->
+  <rect x="570" y="378" width="230" height="72" rx="10" fill="#0f0a20" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="685" y="400" text-anchor="middle" fill="#a78bfa" font-size="13" font-weight="700">SIEM / OpenSearch</text>
+  <text x="685" y="416" text-anchor="middle" fill="#6e7681" font-size="10">실시간 위협 탐지 대시보드</text>
+  <text x="685" y="432" text-anchor="middle" fill="#8b949e" font-size="10">Kibana 시각화</text>
+  <text x="685" y="448" text-anchor="middle" fill="#8b949e" font-size="10">Kinesis Firehose 연동</text>
+
+  <!-- 범례 -->
+  <rect x="40" y="460" width="12" height="4" rx="2" fill="#58a6ff"/>
+  <text x="58" y="466" fill="#6e7681" font-size="10">ECS stdout → CloudWatch</text>
+  <rect x="220" y="460" width="12" height="4" rx="2" fill="#c4b5fd"/>
+  <text x="238" y="466" fill="#6e7681" font-size="10">CloudTrail → CloudWatch</text>
+  <rect x="420" y="460" width="12" height="4" rx="2" fill="#e3b341"/>
+  <text x="438" y="466" fill="#6e7681" font-size="10">CloudWatch → 분석 레이어</text>
+</svg>

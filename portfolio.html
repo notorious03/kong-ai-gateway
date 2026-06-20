@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 보안 게이트웨이 포트폴리오 — Kong AI Gateway on AWS ECS Fargate</title>
+<style>
+  /* ── 기본 레이아웃 ── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #1a1a2e;
+    background: #f8f9fc;
+  }
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── 표지 ── */
+  .cover {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 80px 60px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(99,179,237,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(99,179,237,0.2);
+    border: 1px solid rgba(99,179,237,0.4);
+    color: #90cdf4;
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 0.05em;
+  }
+  .cover h1 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 16px;
+  }
+  .cover h1 span { color: #63b3ed; }
+  .cover .subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .cover-meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .cover-meta-item .label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .cover-meta-item .value {
+    font-size: 14px;
+    color: white;
+    font-weight: 500;
+  }
+  .cover-meta-item .value a { color: #63b3ed; }
+
+  /* ── 콘텐츠 래퍼 ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── 섹션 ── */
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f3460;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e8f0fe;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .icon {
+    width: 32px; height: 32px;
+    background: #e8f0fe;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e3a5f;
+    margin: 24px 0 10px;
+  }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: #374151; }
+
+  /* ── 배지/태그 ── */
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 2px 3px;
+  }
+  .tag-blue   { background: #dbeafe; color: #1d4ed8; }
+  .tag-green  { background: #d1fae5; color: #065f46; }
+  .tag-orange { background: #ffedd5; color: #9a3412; }
+  .tag-purple { background: #ede9fe; color: #5b21b6; }
+  .tag-red    { background: #fee2e2; color: #991b1b; }
+
+  /* ── 아키텍처 다이어그램 ── */
+  .arch-diagram {
+    background: #0d1117;
+    border-radius: 10px;
+    padding: 24px 28px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #c9d1d9;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  .arch-diagram .comment { color: #8b949e; }
+  .arch-diagram .highlight { color: #58a6ff; font-weight: 600; }
+  .arch-diagram .green { color: #3fb950; }
+  .arch-diagram .yellow { color: #d29922; }
+  .arch-diagram .orange { color: #e3b341; }
+
+  /* ── 표 ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  thead th {
+    background: #f0f4ff;
+    color: #1e3a5f;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid #d1ddf7;
+  }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #fafbff; }
+
+  /* ── 카드 그리드 ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .card {
+    background: #f8faff;
+    border: 1px solid #e2eafc;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .card-icon { font-size: 24px; margin-bottom: 10px; }
+  .card h4 { font-size: 14px; font-weight: 700; color: #1e3a5f; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: #4b5563; margin: 0; line-height: 1.6; }
+
+  /* ── 타임라인 / 문제 해결 ── */
+  .problem-item {
+    border-left: 3px solid #e2e8f0;
+    padding-left: 20px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .problem-item::before {
+    content: '';
+    width: 10px; height: 10px;
+    background: #e53e3e;
+    border-radius: 50%;
+    position: absolute; left: -6.5px; top: 5px;
+  }
+  .problem-item .problem-title {
+    font-weight: 700; color: #c53030; margin-bottom: 4px; font-size: 14px;
+  }
+  .problem-item .cause { color: #744210; font-size: 13px; margin-bottom: 4px; }
+  .problem-item .fix {
+    color: #276749; font-size: 13px;
+    border-left: 2px solid #68d391;
+    padding-left: 10px;
+    margin-top: 6px;
+  }
+
+  /* ── 코드 블록 ── */
+  pre {
+    background: #0d1117;
+    color: #c9d1d9;
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 12px 0;
+  }
+  code {
+    background: #f0f4ff;
+    color: #3730a3;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12.5px;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* ── 시나리오 카드 ── */
+  .scenario {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .scenario-header {
+    background: linear-gradient(90deg, #1e3a5f, #2563eb);
+    color: white;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .scenario-body { padding: 16px 20px; }
+  .scenario-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+  .scenario-label {
+    min-width: 60px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .label-threat { background: #fee2e2; color: #991b1b; }
+  .label-detect { background: #dbeafe; color: #1d4ed8; }
+  .label-action { background: #d1fae5; color: #065f46; }
+  .scenario-text { font-size: 13px; color: #374151; flex: 1; }
+
+  /* ── 스택 뱃지 ── */
+  .stack-group { margin-bottom: 20px; }
+  .stack-group h4 { font-size: 13px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stack-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stack-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* ── 하이라이트 박스 ── */
+  .highlight-box {
+    background: #f0f7ff;
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid #2563eb;
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .highlight-box.green {
+    background: #f0fdf4; border-color: #86efac; border-left-color: #16a34a;
+  }
+  .highlight-box.orange {
+    background: #fff7ed; border-color: #fed7aa; border-left-color: #ea580c;
+  }
+
+  /* ── 깃허브 링크 섹션 ── */
+  .github-banner {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border-radius: 12px;
+    padding: 32px 40px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .github-banner h3 { color: white; font-size: 18px; margin: 0 0 6px; }
+  .github-banner p { color: rgba(255,255,255,0.7); margin: 0; font-size: 13px; }
+  .github-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #1a1a2e;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: transform 0.1s;
+  }
+  .github-btn:hover { transform: translateY(-1px); text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+  /* ── 인쇄 최적화 ── */
+  @media print {
+    body { background: white; font-size: 12px; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section { box-shadow: none; border: 1px solid #e5e7eb; margin-bottom: 16px; break-inside: avoid; }
+    .arch-diagram { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .scenario-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .github-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cover-meta { gap: 20px; }
+    h3 { margin-top: 16px; }
+    .card-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     표지
+══════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">AI Security Portfolio</div>
+  <h1>기업 내 <span>Claude Code</span> 안전 사용을 위한<br>엔터프라이즈 AI 보안 게이트웨이</h1>
+  <p class="subtitle">
+    AWS Bedrock 기반 Kong AI Gateway + AI Guardrails 미들웨어를 활용한<br>
+    다층 보안 LLM 인프라 설계 및 구현 프로젝트
+  </p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <span class="label">역할</span>
+      <span class="value">AI 보안 아키텍처 설계 &amp; 구현</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">GitHub</span>
+      <span class="value"><a href="https://github.com/notorious03/kong-ai-gateway" target="_blank">github.com/notorious03/kong-ai-gateway</a></span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">배포 환경</span>
+      <span class="value">AWS ECS Fargate (us-east-1)</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">작성일</span>
+      <span class="value">2026년 6월</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ══════════════════════════════
+     1. 프로젝트 개요
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">📋</div>
+    프로젝트 개요
+  </div>
+
+  <p>
+    기업이 <strong>Claude Code</strong>를 임직원에게 제공할 때, AI 보안 담당자가 마주하는
+    핵심 과제를 해결하기 위해 설계한 프로젝트입니다.
+    단순한 프록시 레이어가 아닌, <strong>데이터 주권 · 접근 통제 · 실시간 위협 탐지 · 감사 추적</strong>을
+    모두 갖춘 엔터프라이즈 LLM 보안 인프라를 구현했습니다.
+  </p>
+
+  <table>
+    <thead><tr><th>보안 과제</th><th>이 아키텍처의 해결 방식</th></tr></thead>
+    <tbody>
+      <tr><td>코드·데이터가 외부로 나가는 것이 불안하다</td><td>AWS Bedrock으로 VPC 내부에서만 처리</td></tr>
+      <tr><td>직원이 어떤 프롬프트를 넣는지 모른다</td><td>Kong 중앙 게이트웨이에서 전수 감사 로그</td></tr>
+      <tr><td>Jailbreak · 프롬프트 인젝션 공격을 막아야 한다</td><td>LLM Guard ML 스캐너 실시간 탐지 및 차단</td></tr>
+      <tr><td>주민번호·카드번호 등 PII가 모델로 유출될 수 있다</td><td>Microsoft Presidio Anonymize로 마스킹 후 전달</td></tr>
+      <tr><td>특정 부서/도구별로 접근을 제한해야 한다</td><td>Kong key-auth + rate-limiting 정책</td></tr>
+      <tr><td>MCP 도구 서버도 중앙에서 관리하고 싶다</td><td>Kong AI MCP Proxy 통합</td></tr>
+      <tr><td>보안 사고 발생 시 로그가 파편화되어 있다</td><td>CloudWatch 통합 + Athena/SIEM 연동</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════
+     2. 시스템 아키텍처
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">🏗</div>
+    시스템 아키텍처
+  </div>
+
+  <div style="text-align:center; margin:16px 0;">
+    <img src="docs/arch-diagram.svg" alt="시스템 아키텍처 다이어그램" style="max-width:100%; border-radius:10px;"/>
+  </div>
+
+  <div class="highlight-box">
+    <strong>핵심 설계 원칙:</strong> Claude Code는 <code>AWS_ENDPOINT_URL</code> 환경변수 하나만 변경하면 Kong을 통해 Bedrock으로 라우팅됩니다.
+    개발자 도구(Claude Code) 자체는 수정 없이 보안 게이트웨이를 경유합니다.
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     3. AWS Bedrock 선택 이유
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">☁</div>
+    AWS Bedrock 선택 이유 — 데이터 주권과 컴플라이언스
+  </div>
+
+  <p>
+    Anthropic API를 직접 호출하면 프롬프트와 응답이 Anthropic의 미국 서버를 통과합니다.
+    금융·의료·공공 기관의 데이터 국외 이전 규제, 사내 코드·영업 전략이 담긴 프롬프트 등
+    기업 환경에서는 즉각적인 거부 사유가 됩니다.
+    <strong>AWS Bedrock은 이 문제를 근본적으로 해결합니다.</strong>
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h4>데이터가 AWS 계정 밖으로 나가지 않음</h4>
+      <p>프롬프트·응답이 AWS 계정 내부에서만 처리. VPC Endpoint 구성 시 인터넷 구간 완전 차단 가능.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡</div>
+      <h4>IAM 기반 세밀한 접근 제어</h4>
+      <p>API 키 대신 IAM Role 사용. 팀별 허용 모델 차별화, MFA Condition 추가 인증 가능.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📋</div>
+      <h4>규정 준수 인증 상속</h4>
+      <p>ISO 27001, SOC 2 Type II, PCI-DSS Level 1, HIPAA, ISMS-P 등 AWS 인증을 자사 컴플라이언스에 활용.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗺</div>
+      <h4>데이터 레지던시 보장</h4>
+      <p>리전 명시로 해당 리전 외 데이터 이동 없음. 국내 규제 환경에는 서울 리전 단일 모델 ARN 사용.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h4>CloudTrail 전수 감사</h4>
+      <p>모든 InvokeModel 호출이 CloudTrail에 자동 기록. 누가 언제 어떤 모델을 호출했는지 추적 가능.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h4>AWS 통합 청구 및 비용 추적</h4>
+      <p>팀별 태그로 비용 분리. AWS Budget 알림으로 임계값 초과 시 자동 알림·차단.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>항목</th><th>Anthropic API 직접 호출</th><th>AWS Bedrock</th></tr></thead>
+    <tbody>
+      <tr><td>데이터 경로</td><td>인터넷 → Anthropic 서버 (미국)</td><td>AWS VPC 내부</td></tr>
+      <tr><td>인증 방식</td><td>API 키 (노출 위험)</td><td>IAM Role (자동 관리)</td></tr>
+      <tr><td>감사 로그</td><td>없음</td><td>CloudTrail 전수 기록</td></tr>
+      <tr><td>규정 준수</td><td>별도 검토 필요</td><td>AWS 인증 상속</td></tr>
+      <tr><td>훈련 데이터 사용</td><td>옵트아웃 필요</td><td>계약 상 사용 불가</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════
+     4. Kong AI Gateway 선택 이유
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">🦍</div>
+    Kong AI Gateway 선택 이유 — 시장 검증된 LLM 게이트웨이
+  </div>
+
+  <h3>시장 인지도</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h4>3억 회 이상 다운로드</h4>
+      <p>Docker Hub 기준 API 게이트웨이 중 가장 많은 다운로드 수.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏢</div>
+      <h4>1만 개 이상 기업 사용</h4>
+      <p>Samsung, Expedia, Honeywell, NBCUniversal, Nasdaq 등 글로벌 레퍼런스.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏆</div>
+      <h4>Gartner Magic Quadrant</h4>
+      <p>API Management 부문 매년 Leader/Visionary 선정. Forrester Wave 상위권.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⭐</div>
+      <h4>GitHub Stars 38,000+</h4>
+      <p>CNCF(Cloud Native Computing Foundation) 멤버 프로젝트.</p>
+    </div>
+  </div>
+
+  <h3>LLM Gateway로 선택한 기술적 이유</h3>
+  <table>
+    <thead><tr><th>기능</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AI 전용 플러그인</strong></td><td>ai-proxy, ai-prompt-guard, ai-mcp-proxy, ai-semantic-cache 등 LLM 특화 플러그인 기본 제공</td></tr>
+      <tr><td><strong>OpenAI 호환 API</strong></td><td>Claude Code를 포함한 모든 OpenAI SDK 클라이언트가 코드 수정 없이 연동</td></tr>
+      <tr><td><strong>DB-less GitOps</strong></td><td>단일 YAML 파일로 전체 정책 관리 → PR 리뷰 → 자동 배포로 보안 정책 변경 추적</td></tr>
+      <tr><td><strong>200+ 플러그인 생태계</strong></td><td>key-auth, rate-limiting, ip-restriction, bot-detection, opentelemetry 등 즉시 확장</td></tr>
+      <tr><td><strong>멀티 팀 라우팅</strong></td><td>팀별 다른 모델·rate limit·허용 경로를 단일 게이트웨이에서 통합 관리</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box">
+    <strong>Claude Code 무수정 연결:</strong>
+    Kong이 <code>/v1/chat/completions</code> 엔드포인트를 제공하므로
+    Claude Code에서 <code>AWS_ENDPOINT_URL=http://&lt;KONG_IP&gt;:8000</code> 환경변수 하나만 설정하면
+    보안 게이트웨이를 경유해 Bedrock으로 라우팅됩니다.
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     5. MCP Gateway 통합
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">🔌</div>
+    MCP Gateway 통합 — 도구 서버 중앙 통제
+  </div>
+
+  <p>
+    MCP(Model Context Protocol)는 Claude가 파일시스템·DB·API 등 외부 도구를 호출하는 표준 프로토콜입니다.
+    각 개발자가 MCP 서버를 직접 설정하면 감사 불가 · 접근 통제 불가 · 악성 서버 탐지 불가 등
+    보안 사각지대가 생깁니다. Kong을 MCP 게이트웨이로 사용하면 이를 해결합니다.
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📜</div>
+      <h4>중앙 감사</h4>
+      <p>모든 MCP 도구 호출이 Kong 로그에 기록. 누가 어떤 도구를 언제 호출했는지 추적.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🚦</div>
+      <h4>도구 화이트리스트 제어</h4>
+      <p>read_file은 허용, delete_file·execute_command는 차단. 코드로 정책 관리.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <h4>팀별 접근 차별화</h4>
+      <p>엔지니어링 팀은 DB 접근 허용, HR 팀은 파일시스템만 허용하는 ACL 정책.</p>
+    </div>
+  </div>
+
+  <h3>MCP 정책 설정 예시</h3>
+  <pre>
+# kong/kong.yaml — MCP 도구 화이트리스트 설정
+plugins:
+  - name: ai-mcp-proxy
+    service: mcp-filesystem
+    config:
+      allowed_tools:          # 허용 도구만 화이트리스트
+        - read_file
+        - list_directory
+        - search_files
+      blocked_tools:          # 위험 도구 블랙리스트
+        - write_file
+        - delete_file
+        - execute_command
+      allowed_paths:          # 접근 가능 경로 제한
+        - /workspace/projects
+      blocked_paths:
+        - /etc
+        - /var/secrets</pre>
+</div>
+
+<!-- ══════════════════════════════
+     6. AI Guardrails 미들웨어
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">🛡</div>
+    AI Guardrails 미들웨어 — 독립 보안 계층
+  </div>
+
+  <h3>Bedrock 기본 가드레일 대신 독립 미들웨어를 선택한 이유</h3>
+
+  <table>
+    <thead><tr><th>비교 항목</th><th>Bedrock 기본 Guardrails</th><th>이 프로젝트 Guardrails</th></tr></thead>
+    <tbody>
+      <tr><td>PII 감지</td><td>영어 중심, 패턴 매칭</td><td><strong>Presidio NLP + BERT NER (다국어 포함)</strong></td></tr>
+      <tr><td>프롬프트 인젝션</td><td>키워드 기반 제한적 탐지</td><td><strong>전용 ML 모델 (DeBERTa 기반, 94% F1)</strong></td></tr>
+      <tr><td>정책 관리</td><td>AWS 콘솔 UI 클릭</td><td><strong>코드로 관리, Git 버전 추적</strong></td></tr>
+      <tr><td>커스텀 확장</td><td>AWS가 허용하는 범위</td><td><strong>임의 스캐너 추가 가능</strong></td></tr>
+      <tr><td>응답 후처리</td><td>없음</td><td><strong>출력 PII 마스킹, 민감정보 재검사</strong></td></tr>
+      <tr><td>추가 비용</td><td>요청당 과금 추가</td><td><strong>컴퓨팅 비용만</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>사용된 오픈소스 라이브러리</h3>
+  <div class="stack-group">
+    <div class="stack-badges">
+      <span class="stack-badge"><span>🔒</span> LLM Guard 0.3.14 (ProtectAI)</span>
+      <span class="stack-badge"><span>🔍</span> Microsoft Presidio</span>
+      <span class="stack-badge"><span>🤗</span> HuggingFace Transformers</span>
+      <span class="stack-badge"><span>📝</span> spaCy NER</span>
+      <span class="stack-badge"><span>⚡</span> FastAPI</span>
+    </div>
+  </div>
+
+  <h3>활성화된 스캐너 파이프라인</h3>
+  <table>
+    <thead><tr><th>단계</th><th>스캐너</th><th>탐지 대상</th><th>동작</th></tr></thead>
+    <tbody>
+      <tr>
+        <td rowspan="6"><strong>Input</strong><br><small>(프롬프트 입력 시)</small></td>
+        <td><span class="tag tag-blue">Anonymize</span></td>
+        <td>이름, 이메일, 전화번호, 주민번호, 카드번호</td>
+        <td>마스킹 후 전달</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-red">PromptInjection</span></td>
+        <td>"이전 지시 무시", Jailbreak 패턴</td>
+        <td>score &gt; 0.75 차단</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-orange">Toxicity</span></td>
+        <td>욕설, 혐오 발언, 위협적 언어</td>
+        <td>score &gt; 0.70 차단</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-purple">TokenLimit</span></td>
+        <td>입력 길이 초과</td>
+        <td>4096 토큰 초과 차단</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-orange">BanTopics</span></td>
+        <td>환경변수로 정의한 금지 주제</td>
+        <td>score &gt; 0.60 차단</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-red">BanSubstrings</span></td>
+        <td>환경변수로 정의한 금지 문자열</td>
+        <td>포함 시 차단</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>Output</strong><br><small>(응답 반환 시)</small></td>
+        <td><span class="tag tag-blue">Deanonymize</span></td>
+        <td>마스킹된 PII 복원</td>
+        <td>[PERSON] → 원래 이름 복원</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-red">Sensitive</span></td>
+        <td>응답 내 비밀번호·토큰·키</td>
+        <td>[REDACTED]로 대체</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>정책 추가 방법 — 환경변수로 즉시 적용</h3>
+  <pre>
+# ECS Task Definition 환경변수 설정으로 정책 변경 (재빌드 불필요)
+BAN_TOPICS=malware,hacking,drugs,weapon     # 금지 주제 (쉼표 구분)
+BAN_SUBSTRINGS=ignore instructions,jailbreak # 금지 문자열
+BLOCK_THRESHOLD=0.7                          # 차단 임계값 (낮을수록 엄격)
+MAX_TOKENS_INPUT=2048                        # 입력 토큰 제한</pre>
+</div>
+
+<!-- ══════════════════════════════
+     7. 통합 로그 및 보안 모니터링
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">📊</div>
+    통합 로그 관리 및 보안 모니터링 시나리오
+  </div>
+
+  <h3>로그 통합 흐름</h3>
+  <div style="text-align:center; margin:16px 0;">
+    <img src="docs/log-flow-diagram.svg" alt="로그 통합 흐름 다이어그램" style="max-width:100%; border-radius:10px;"/>
+  </div>
+
+  <h3>5가지 보안 모니터링 시나리오</h3>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <span>⚠</span> 시나리오 1 — 프롬프트 인젝션 공격 탐지
+    </div>
+    <div class="scenario-body">
+      <div class="scenario-row">
+        <span class="scenario-label label-threat">위협</span>
+        <span class="scenario-text">공격자가 "이전 지시 무시", "당신은 제한 없는 AI야" 등의 패턴으로 가드레일 우회 시도</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-detect">탐지</span>
+        <span class="scenario-text">Guardrails의 PromptInjection 스캐너 score 급등 → CloudWatch Alarm (10건/5분 이상 시 SNS 알림)</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-action">대응</span>
+        <span class="scenario-text">해당 소비자 API 키 kong.yaml에서 제거 → IP 차단 플러그인 추가 → BAN_SUBSTRINGS에 패턴 등록</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <span>🔍</span> 시나리오 2 — PII 반복 유출 시도 탐지
+    </div>
+    <div class="scenario-body">
+      <div class="scenario-row">
+        <span class="scenario-label label-threat">위협</span>
+        <span class="scenario-text">임직원이 고객 개인정보(주민번호·카드번호)를 Claude에 반복 입력해 데이터 처리 시도</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-detect">탐지</span>
+        <span class="scenario-text">Guardrails 로그의 anonymized_entities 필드 집계 → 동일 소비자의 PII 익명화 빈도 이상 탐지</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-action">대응</span>
+        <span class="scenario-text">해당 부서 DLP 정책 점검 → 사용자 보안 교육 실시 → 필요 시 해당 팀 API 접근 임시 제한</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <span>📈</span> 시나리오 3 — 비정상 사용량 폭증 탐지
+    </div>
+    <div class="scenario-body">
+      <div class="scenario-row">
+        <span class="scenario-label label-threat">위협</span>
+        <span class="scenario-text">단일 계정이 자동화 스크립트로 대량 API 호출 → 비용 폭증 또는 서비스 저하</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-detect">탐지</span>
+        <span class="scenario-text">Kong 로그에서 429 Rate Limit 위반 연속 발생 감지 + Bedrock CloudTrail 토큰 급증 패턴</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-action">대응</span>
+        <span class="scenario-text">해당 소비자의 rate limit 즉시 축소 → 자동화 여부 조사 → AWS Budget 알림으로 비용 차단</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <span>🚫</span> 시나리오 4 — 업무 외 주제 질의 누적 탐지
+    </div>
+    <div class="scenario-body">
+      <div class="scenario-row">
+        <span class="scenario-label label-threat">위협</span>
+        <span class="scenario-text">임직원이 업무 외 용도(개인 프로젝트, 금지 주제)로 회사 Claude 자원 남용</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-detect">탐지</span>
+        <span class="scenario-text">BanTopics 차단 이벤트 누적 현황 → 일별 소비자별 위반 횟수 집계 → 임계값 초과 시 관리자 통보</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-action">대응</span>
+        <span class="scenario-text">반복 위반자 관리자 통보 → BAN_TOPICS에 추가 주제 등록 → 임계값 조정</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <span>🔓</span> 시나리오 5 — 모델 응답 내 민감정보 유출 탐지
+    </div>
+    <div class="scenario-body">
+      <div class="scenario-row">
+        <span class="scenario-label label-threat">위협</span>
+        <span class="scenario-text">Claude가 응답 중 시스템 프롬프트 내용, 내부 설정값, 비밀번호 등을 의도치 않게 노출</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-detect">탐지</span>
+        <span class="scenario-text">Output Sensitive 스캐너가 응답에서 민감정보 감지 시 [REDACTED] 처리 + 이벤트 로그 기록</span>
+      </div>
+      <div class="scenario-row">
+        <span class="scenario-label label-action">대응</span>
+        <span class="scenario-text">마스킹된 내용의 패턴 분석 → 시스템 프롬프트 민감정보 제거 → Sensitive 스캐너 임계값 조정</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     8. 기술 스택
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">⚙</div>
+    기술 스택
+  </div>
+
+  <div class="stack-group">
+    <h4>AI / LLM</h4>
+    <div class="stack-badges">
+      <span class="stack-badge">AWS Bedrock</span>
+      <span class="stack-badge">Claude Sonnet 4.6 (Anthropic)</span>
+      <span class="stack-badge">Cross-region Inference Profile</span>
+    </div>
+  </div>
+
+  <div class="stack-group">
+    <h4>API Gateway / 보안</h4>
+    <div class="stack-badges">
+      <span class="stack-badge">Kong AI Gateway 3.9 OSS</span>
+      <span class="stack-badge">DB-less 선언적 설정</span>
+      <span class="stack-badge">key-auth Plugin</span>
+      <span class="stack-badge">rate-limiting Plugin</span>
+      <span class="stack-badge">ai-mcp-proxy Plugin</span>
+    </div>
+  </div>
+
+  <div class="stack-group">
+    <h4>AI Guardrails</h4>
+    <div class="stack-badges">
+      <span class="stack-badge">LLM Guard 0.3.14 (ProtectAI)</span>
+      <span class="stack-badge">Microsoft Presidio</span>
+      <span class="stack-badge">HuggingFace Transformers</span>
+      <span class="stack-badge">DeBERTa-v3 (Prompt Injection)</span>
+      <span class="stack-badge">spaCy NER</span>
+      <span class="stack-badge">FastAPI</span>
+    </div>
+  </div>
+
+  <div class="stack-group">
+    <h4>인프라 / DevOps</h4>
+    <div class="stack-badges">
+      <span class="stack-badge">AWS ECS Fargate</span>
+      <span class="stack-badge">Amazon ECR</span>
+      <span class="stack-badge">AWS CodeBuild</span>
+      <span class="stack-badge">Amazon Linux 2023</span>
+      <span class="stack-badge">Docker</span>
+    </div>
+  </div>
+
+  <div class="stack-group">
+    <h4>관찰성 / 로깅</h4>
+    <div class="stack-badges">
+      <span class="stack-badge">Amazon CloudWatch Logs</span>
+      <span class="stack-badge">AWS CloudTrail</span>
+      <span class="stack-badge">Amazon S3 (아카이브)</span>
+      <span class="stack-badge">Amazon Athena</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     9. 금융기업 보안 담당자 관점 분석
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">🏦</div>
+    금융기업 보안 담당자 관점 — 도입 고려사항 및 기술 발전 분석
+  </div>
+
+  <p>
+    금융기업은 일반 기업 대비 훨씬 엄격한 규제 환경(금융보안원 가이드라인, 전자금융감독규정, 개인정보보호법, 신용정보법)에 놓여 있습니다.
+    AI 코딩 도구 도입 시 보안 담당자가 반드시 검토해야 할 사항들을 기술 성숙도 변화와 함께 정리합니다.
+  </p>
+
+  <!-- ── 1. 도입 시 핵심 고려사항 ── -->
+  <h3>1. 금융기업 AI 도구 도입 시 핵심 고려사항</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:20%">고려 영역</th>
+        <th style="width:40%">구체적 요구사항</th>
+        <th style="width:40%">이 아키텍처의 대응</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>데이터 국외 이전 통제</strong></td>
+        <td>금융고객 정보·내부 코드가 해외 서버로 전송되는 것을 차단해야 함. 신용정보법 제32조, 개인정보보호법 제28조의8 적용</td>
+        <td>AWS Bedrock VPC Endpoint → 프롬프트가 AWS 계정 밖으로 이동하지 않음. Presidio로 PII를 마스킹한 뒤 전달</td>
+      </tr>
+      <tr>
+        <td><strong>전자금융감독규정 준수</strong></td>
+        <td>생성형 AI가 생성한 코드·문서가 업무에 사용될 경우 사람의 검토·승인 절차 요구. 자동화 단계 제한</td>
+        <td>AI는 보조 도구로만 활용. 게이트웨이에서 모든 요청·응답 로깅 → 사후 감사 가능</td>
+      </tr>
+      <tr>
+        <td><strong>내부정보 유출 방지</strong></td>
+        <td>M&A 정보, 금리 정책, 여신 심사 기준 등 MNPI(중요 미공개 정보)가 프롬프트에 포함될 위험</td>
+        <td>BanTopics 스캐너로 금지 주제 실시간 차단. BanSubstrings로 내부 코드명·프로젝트명 필터링</td>
+      </tr>
+      <tr>
+        <td><strong>접근 권한 최소화</strong></td>
+        <td>직급·부서별로 AI 사용 범위 차별화. 고위험 업무(리스크 관리, 심사) 담당자는 더 엄격한 제어 필요</td>
+        <td>Kong Consumer 그룹 + ACL 플러그인으로 팀별 rate limit·허용 모델 차별화</td>
+      </tr>
+      <tr>
+        <td><strong>감사 추적 (Audit Trail)</strong></td>
+        <td>금감원 검사 시 "누가 AI에 무엇을 질문했는가"를 소명할 수 있어야 함. 최소 5년 보존 요구</td>
+        <td>Kong 액세스 로그 + Guardrails 상세 로그 → CloudWatch → S3 장기 보관 + Athena 쿼리</td>
+      </tr>
+      <tr>
+        <td><strong>모델 응답의 신뢰성</strong></td>
+        <td>AI가 잘못된 금융 규정·수치를 생성할 경우 법적 리스크 발생 (Hallucination 위험)</td>
+        <td>현재 아키텍처에서 미해결 — 별도의 RAG 또는 사실 검증 레이어 추가 필요</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── 2. 도입을 막았던 장벽 → 기술 발전으로 해결된 사항 ── -->
+  <h3>2. 과거 도입을 막았던 장벽 — AI 기술 발전으로 해결된 사항</h3>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
+
+    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
+      <div style="background:#1e3a5f; padding:12px 16px;">
+        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ①  프롬프트 인젝션 탐지 불가</span>
+      </div>
+      <div style="padding:14px 16px; background:#f0f7ff;">
+        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
+        <p style="font-size:13px; margin-bottom:10px;">규칙 기반 필터는 "ignore previous instructions" 같은 패턴을 우회하는 공격에 무력. 금융 보안 담당자 입장에서 AI 도구 자체가 공격 경로가 될 수 있어 전면 금지 기조</p>
+        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
+        <p style="font-size:13px; margin:0;">DeBERTa-v3 기반 전용 분류 모델(protectai/deberta-v3-base-prompt-injection-v2)이 공개되어 F1 94% 수준의 실시간 탐지가 가능해짐. 규칙이 아닌 의미 이해 기반 탐지</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
+      <div style="background:#1e3a5f; padding:12px 16px;">
+        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ②  한국어 PII 인식 부재</span>
+      </div>
+      <div style="padding:14px 16px; background:#f0f7ff;">
+        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
+        <p style="font-size:13px; margin-bottom:10px;">금융고객 정보(주민번호, 계좌번호 등)를 AI 입력 전 자동 마스킹하는 오픈소스 도구가 영어 중심. 한국어 금융 문서에서 PII를 자동 탐지하기 어려웠음</p>
+        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
+        <p style="font-size:13px; margin:0;">BERT 기반 다국어 NER 모델과 Microsoft Presidio의 커스텀 인식기 기능으로 한국어 주민번호·계좌번호·전화번호 패턴을 추가 학습 없이도 정규식 + NLP 조합으로 탐지 가능</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
+      <div style="background:#1e3a5f; padding:12px 16px;">
+        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ③  데이터 처리 경로 불투명</span>
+      </div>
+      <div style="padding:14px 16px; background:#f0f7ff;">
+        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
+        <p style="font-size:13px; margin-bottom:10px;">SaaS 형태의 AI API를 호출하면 데이터가 어느 서버를 거쳐 처리되는지 알 수 없어 금융감독 기관의 데이터 처리 경로 소명 요구에 대응 불가</p>
+        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
+        <p style="font-size:13px; margin:0;">AWS Bedrock의 VPC Endpoint + CloudTrail 조합으로 모든 API 호출이 계정 내부에서 처리되고 전수 기록됨. 금감원 검사 시 처리 경로를 로그로 소명 가능</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #1d4ed8; border-radius:10px; overflow:hidden;">
+      <div style="background:#1e3a5f; padding:12px 16px;">
+        <span style="color:#93c5fd; font-weight:700; font-size:13px;">과거 장벽 ④  보안 정책의 코드화 불가</span>
+      </div>
+      <div style="padding:14px 16px; background:#f0f7ff;">
+        <p style="color:#6b7280; font-size:12px; margin-bottom:6px;">이전 상황</p>
+        <p style="font-size:13px; margin-bottom:10px;">AI 사용 정책을 사람이 매뉴얼로 관리. 어떤 주제는 금지, 어떤 부서는 허용 등 정책 변경이 느리고 적용 누락 발생</p>
+        <p style="color:#16a34a; font-size:12px; margin-bottom:4px; font-weight:700;">기술 발전으로 해결</p>
+        <p style="font-size:13px; margin:0;">Kong DB-less YAML + LLM Guard 환경변수 기반으로 보안 정책을 코드로 선언. Git PR 리뷰 → 자동 배포로 정책 변경 이력이 코드와 함께 관리됨 (Policy as Code)</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 3. 여전히 미흡한 사항 ── -->
+  <h3>3. 여전히 미흡하거나 미해결로 남은 과제</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:5%"></th>
+        <th style="width:25%">미해결 과제</th>
+        <th style="width:40%">현재 상태 및 한계</th>
+        <th style="width:30%">잠재적 리스크</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:center"><span class="tag tag-red">미흡</span></td>
+        <td><strong>Hallucination(환각) 탐지</strong></td>
+        <td>모델이 존재하지 않는 금융 규정, 잘못된 수치를 자신 있게 생성해도 현재 아키텍처는 이를 탐지할 수단이 없음</td>
+        <td>금융 업무 활용 시 잘못된 정보가 의사결정에 반영될 위험. RAG + 사실 검증 레이어 필요</td>
+      </tr>
+      <tr>
+        <td style="text-align:center"><span class="tag tag-red">미흡</span></td>
+        <td><strong>한국어 특화 PII 정밀도</strong></td>
+        <td>BERT 다국어 모델이 한국어 PII를 처리하나, 금융 도메인 특화 학습이 없어 "홍길동 계좌" 같은 문맥 의존 PII는 탐지율이 낮음</td>
+        <td>금융고객 정보가 마스킹 없이 모델로 전달될 가능성. 금융 도메인 파인튜닝된 NER 모델 필요</td>
+      </tr>
+      <tr>
+        <td style="text-align:center"><span class="tag tag-red">미흡</span></td>
+        <td><strong>AI 생성 코드 보안 검증</strong></td>
+        <td>Claude Code가 생성한 코드가 보안 취약점(SQL Injection, 하드코딩 시크릿 등)을 포함할 수 있으나 응답 단계에서 코드 취약점 분석은 현재 미구현</td>
+        <td>취약한 코드가 리뷰 없이 배포될 경우 금융 시스템 침해 경로가 될 수 있음</td>
+      </tr>
+      <tr>
+        <td style="text-align:center"><span class="tag tag-orange">부분</span></td>
+        <td><strong>실시간 행위 분석 (UEBA)</strong></td>
+        <td>로그는 수집되나 개별 사용자의 행위 패턴(평소 대비 이상 질의 패턴)을 자동으로 분석하는 UEBA 연동이 미구현</td>
+        <td>점진적인 정보 탈취(slow exfiltration) 시도를 룰 기반 알림만으로는 탐지하기 어려움</td>
+      </tr>
+      <tr>
+        <td style="text-align:center"><span class="tag tag-orange">부분</span></td>
+        <td><strong>모델 응답 법적 책임 귀속</strong></td>
+        <td>AI가 생성한 금융 조언·코드에 대한 법적 책임이 사용자인지 기업인지 불명확. 현재 국내 법 해석 미정립</td>
+        <td>금융 소비자보호법, 자본시장법 위반 가능성. 면책 조항 및 사용 가이드라인 정책 수립 필요</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── 4. 앞으로의 고려사항 ── -->
+  <h3>4. 향후 고려해야 할 발전 방향</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon" style="font-size:20px;">🔬</div>
+      <h4>RAG 기반 사실 검증 레이어 추가</h4>
+      <p style="font-size:13px;">내부 금융 규정집·상품 약관을 벡터 DB에 색인하고, 모델 응답을 실제 문서와 대조하는 Hallucination 검증 파이프라인 도입. 금융 업무 활용의 핵심 전제 조건.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="font-size:20px;">🇰🇷</div>
+      <h4>한국어 금융 도메인 NER 모델</h4>
+      <p style="font-size:13px;">금융보안원·금융결제원 가이드라인에 맞는 한국어 금융 PII(계좌번호, 증권번호, 보험번호 등)를 정밀 탐지하는 파인튜닝 모델 개발 또는 도입 검토.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="font-size:20px;">🕵</div>
+      <h4>UEBA 연동 이상 행위 탐지</h4>
+      <p style="font-size:13px;">사용자별 AI 질의 패턴을 학습해 평소와 다른 민감 정보 접근 시도를 자동 탐지. CloudWatch Logs를 Amazon Security Lake → SIEM UEBA 엔진과 연동.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="font-size:20px;">🔐</div>
+      <h4>AI 생성 코드 보안 자동 검사</h4>
+      <p style="font-size:13px;">Claude Code 응답으로 생성된 코드를 SAST 도구(Semgrep, Bandit)와 연동해 취약점을 자동 탐지하고 위험 코드 패턴 포함 시 경고 또는 차단.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="font-size:20px;">📜</div>
+      <h4>AI 사용 정책 거버넌스 체계 수립</h4>
+      <p style="font-size:13px;">금융보안원의 AI 활용 보안 가이드라인(2024)에 따른 내부 정책 수립. 허용 업무 범위, 출력물 검토 의무, 사고 시 책임 귀속 등 운영 규정 문서화.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="font-size:20px;">🌐</div>
+      <h4>망분리 환경 적용 방안</h4>
+      <p style="font-size:13px;">금융기관 망분리 규정(전자금융감독규정 제15조)에서 인터넷망 AI 도구 사용은 원칙적으로 금지. AWS GovCloud 또는 온프레미스 LLM 서버 구성으로 내부망 전용 AI 환경 구축 검토 필요.</p>
+    </div>
+  </div>
+
+  <div class="highlight-box orange">
+    <strong>금융 보안 담당자 종합 판단:</strong>
+    현재 아키텍처는 <strong>데이터 주권·접근 제어·감사 추적</strong>의 기본 요건을 충족합니다.
+    그러나 금융 업무에 실제 활용하려면 Hallucination 검증 레이어 추가, 한국어 PII 정밀도 향상,
+    망분리 환경 대응이 선결 과제입니다. 현 단계에서는 <strong>개발 보조 도구(코드 초안 생성, 문서 요약)</strong>
+    수준의 제한적 활용과 병행하여 단계적으로 보안 성숙도를 높여가는 접근이 현실적입니다.
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     10. 구현 결과
+══════════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon">✅</div>
+    구현 결과 및 검증
+  </div>
+
+  <table>
+    <thead><tr><th>검증 항목</th><th>결과</th><th>비고</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>ECS Fargate 배포</td>
+        <td><span class="tag tag-green">HEALTHY</span></td>
+        <td>Kong + Guardrails 양 컨테이너 health check 통과</td>
+      </tr>
+      <tr>
+        <td>정상 Claude Code 요청</td>
+        <td><span class="tag tag-green">200 OK</span></td>
+        <td>OpenAI 형식으로 Bedrock Claude Sonnet 4.6 응답 수신</td>
+      </tr>
+      <tr>
+        <td>Jailbreak 프롬프트 차단</td>
+        <td><span class="tag tag-red">400 차단</span></td>
+        <td>PromptInjection 스캐너 score 0.94, 한국어 메시지 반환</td>
+      </tr>
+      <tr>
+        <td>Rate Limiting</td>
+        <td><span class="tag tag-green">동작</span></td>
+        <td>응답 헤더에 X-RateLimit-Remaining 포함 확인</td>
+      </tr>
+      <tr>
+        <td>Bedrock 경로 (AWS SDK)</td>
+        <td><span class="tag tag-green">200 OK</span></td>
+        <td>/model/{id}/invoke 경로, API 키 불필요 (IAM 인증)</td>
+      </tr>
+      <tr>
+        <td>CloudWatch 로그 수집</td>
+        <td><span class="tag tag-green">정상</span></td>
+        <td>Kong, Guardrails 각 로그 그룹에 실시간 수집</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box green">
+    <strong>E2E 검증 완료:</strong>
+    Claude Code → Kong (key-auth + rate-limiting) → Guardrails (PromptInjection 탐지 + PII 마스킹)
+    → Bedrock Claude Sonnet 4.6 응답 → Guardrails (출력 검사) → 클라이언트 반환
+    전체 흐름이 AWS ECS Fargate 프로덕션 환경에서 검증되었습니다.
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     GitHub 링크
+══════════════════════════════ -->
+<div class="github-banner">
+  <div>
+    <h3>소스 코드 전체 보기</h3>
+    <p>Kong 설정 · Guardrails 코드 · ECS 배포 스크립트 · 상세 문서 5편이 포함되어 있습니다.</p>
+  </div>
+  <a href="https://github.com/notorious03/kong-ai-gateway" target="_blank" class="github-btn">
+    <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+    </svg>
+    GitHub에서 열기
+  </a>
+</div>
+
+</div><!-- /container -->
+
+<!-- 인쇄 안내 -->
+<div style="text-align:center; padding: 24px; color: #9ca3af; font-size: 12px;">
+  이 파일을 PDF로 저장하려면 브라우저에서 <strong>Ctrl+P → PDF로 저장</strong>을 사용하세요.
+</div>
+
+</body>
+</html>
