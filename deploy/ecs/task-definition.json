@@ -1,0 +1,103 @@
+{
+  "family": "kong-ai-gateway",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "8192",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/kongAiGatewayTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "kong",
+      "image": "kong/kong-gateway:3.9.0",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 8000, "protocol": "tcp", "name": "proxy" },
+        { "containerPort": 8001, "protocol": "tcp", "name": "admin" }
+      ],
+      "environment": [
+        { "name": "KONG_DATABASE", "value": "off" },
+        { "name": "KONG_DECLARATIVE_CONFIG", "value": "/kong/kong.yaml" },
+        { "name": "KONG_PROXY_LISTEN", "value": "0.0.0.0:8000" },
+        { "name": "KONG_ADMIN_LISTEN", "value": "0.0.0.0:8001" },
+        { "name": "KONG_LOG_LEVEL", "value": "info" },
+        { "name": "KONG_PLUGINS", "value": "bundled,ai-proxy,ai-prompt-guard,ai-mcp-proxy,key-auth,rate-limiting,file-log,request-transformer" },
+        { "name": "AWS_REGION", "value": "us-east-1" },
+        { "name": "BEDROCK_MODEL_ID", "value": "us.anthropic.claude-sonnet-4-6" }
+      ],
+      "secrets": [
+        { "name": "KONG_API_KEY", "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:kong-ai-gateway/api-key" },
+        { "name": "AWS_ACCESS_KEY_ID", "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:kong-ai-gateway/aws-credentials:AWS_ACCESS_KEY_ID::" },
+        { "name": "AWS_SECRET_ACCESS_KEY", "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:kong-ai-gateway/aws-credentials:AWS_SECRET_ACCESS_KEY::" }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "kong-config",
+          "containerPath": "/kong",
+          "readOnly": true
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/kong-ai-gateway/kong",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "kong"
+        }
+      },
+      "dependsOn": [
+        { "containerName": "guardrails", "condition": "HEALTHY" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8001/status || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 30
+      }
+    },
+    {
+      "name": "guardrails",
+      "image": "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ai-guardrails:latest",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 8080, "protocol": "tcp", "name": "guardrails" }
+      ],
+      "environment": [
+        { "name": "AWS_REGION", "value": "us-east-1" },
+        { "name": "BEDROCK_MODEL_ID", "value": "us.anthropic.claude-sonnet-4-6" },
+        { "name": "BEDROCK_GUARDRAIL_VERSION", "value": "DRAFT" },
+        { "name": "BLOCK_THRESHOLD", "value": "0.8" },
+        { "name": "MAX_TOKENS_INPUT", "value": "4096" }
+      ],
+      "secrets": [
+        { "name": "BEDROCK_GUARDRAIL_ID", "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:kong-ai-gateway/bedrock-guardrail-id" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/kong-ai-gateway/guardrails",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "guardrails"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 90
+      }
+    }
+  ],
+  "volumes": [
+    {
+      "name": "kong-config",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "EFS_FILESYSTEM_ID",
+        "rootDirectory": "/kong-config",
+        "transitEncryption": "ENABLED"
+      }
+    }
+  ]
+}

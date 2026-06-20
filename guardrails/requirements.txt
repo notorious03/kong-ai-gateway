@@ -1,0 +1,13 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.0
+boto3==1.35.0
+httpx==0.27.2
+
+# LLM Guard - 가드레일 핵심 라이브러리 (torch 버전은 llm-guard가 결정)
+llm-guard==0.3.14
+torch>=2.0.1,<=2.3.1
+transformers>=4.40.0,<4.45.0
+spacy==3.7.6
+presidio-analyzer==2.2.355
+presidio-anonymizer==2.2.355

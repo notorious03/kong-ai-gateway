@@ -1,0 +1,64 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: llm-guardrails-service
+    url: http://localhost:8080
+    connect_timeout: 10000
+    write_timeout: 60000
+    read_timeout: 60000
+    routes:
+      - name: openai-compat-route
+        paths:
+          - /v1/chat/completions
+        methods:
+          - POST
+        strip_path: false
+    plugins:
+      - name: key-auth
+        config:
+          key_names:
+            - apikey
+          hide_credentials: true
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Kong-Gateway: true"
+
+  - name: bedrock-compat-service
+    url: http://localhost:8080
+    connect_timeout: 10000
+    write_timeout: 60000
+    read_timeout: 60000
+    routes:
+      - name: bedrock-invoke-route
+        paths:
+          - /model
+        methods:
+          - POST
+        strip_path: false
+
+  - name: mcp-proxy-service
+    url: http://localhost:8080/mcp-passthrough
+    routes:
+      - name: mcp-route
+        paths:
+          - /mcp
+        methods:
+          - GET
+          - POST
+        strip_path: false
+
+plugins:
+  - name: rate-limiting
+    config:
+      minute: 60
+      hour: 1000
+      policy: local
+      fault_tolerant: true
+
+consumers:
+  - username: claude-code-client
+    keyauth_credentials:
+      - key: KONG_API_KEY_PLACEHOLDER

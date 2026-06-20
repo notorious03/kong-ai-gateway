@@ -1,0 +1,77 @@
+version: "3.9"
+
+# =============================================================
+# 로컬 개발/테스트용 Docker Compose
+# 실제 운영은 AWS ECS 사용 (deploy/ 디렉터리 참조)
+# =============================================================
+
+services:
+  # -----------------------------------------------------------
+  # Kong AI Gateway (OSS)
+  # -----------------------------------------------------------
+  kong:
+    image: kong/kong-gateway:3.9.0
+    container_name: kong-ai-gateway
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/kong.yaml
+      KONG_PROXY_LISTEN: "0.0.0.0:8000"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_LOG_LEVEL: info
+      KONG_PLUGINS: "bundled,ai-proxy,ai-prompt-guard,ai-mcp-proxy,key-auth,rate-limiting,file-log,request-transformer"
+      # Bedrock 연결 정보 (.env 파일에서 로드)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-us.anthropic.claude-sonnet-4-6}
+      KONG_API_KEY: ${KONG_API_KEY}
+    volumes:
+      - ./kong/kong.yaml:/kong/kong.yaml:ro
+      - kong-logs:/usr/local/kong/logs
+    ports:
+      - "8000:8000"   # Proxy (클라이언트 접속)
+      - "8001:8001"   # Admin API (내부만)
+    depends_on:
+      guardrails:
+        condition: service_healthy
+    networks:
+      - gateway-net
+    restart: unless-stopped
+
+  # -----------------------------------------------------------
+  # AI Guardrails Service
+  # -----------------------------------------------------------
+  guardrails:
+    build:
+      context: ./guardrails
+      dockerfile: Dockerfile
+    container_name: ai-guardrails
+    environment:
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-us.anthropic.claude-sonnet-4-6}
+      BEDROCK_GUARDRAIL_ID: ${BEDROCK_GUARDRAIL_ID:-}
+      BEDROCK_GUARDRAIL_VERSION: ${BEDROCK_GUARDRAIL_VERSION:-DRAFT}
+      BLOCK_THRESHOLD: ${BLOCK_THRESHOLD:-0.8}
+      BAN_TOPICS: ${BAN_TOPICS:-}
+      BAN_SUBSTRINGS: ${BAN_SUBSTRINGS:-}
+      MAX_TOKENS_INPUT: ${MAX_TOKENS_INPUT:-4096}
+    ports:
+      - "8080:8080"
+    networks:
+      - gateway-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  gateway-net:
+    driver: bridge
+
+volumes:
+  kong-logs:
